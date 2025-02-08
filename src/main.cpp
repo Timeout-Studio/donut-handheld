@@ -1,7 +1,7 @@
-#include <Arduino.h>
 #include <Laser.h>
 #include <Display.h>
 #include <Encoder.h>
+#include <lvgl.h>
 
 #define LASER_SWITCH_PIN 10
 #define LASER_PIN 11
@@ -13,18 +13,20 @@ Dn_Laser laser;
 Dn_Display display;
 Dn_Encoder encoder;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
 
   pinMode(LASER_SWITCH_PIN, INPUT);
 
   laser.init(LASER_PIN);
-  display.init();
+  display.init(127);
   encoder.init(ENCODER_S1_PIN, ENCODER_S2_PIN, ENCODER_KEY_PIN);
 }
 
-void loop() {
-
+void loop()
+{
+  lv_task_handler();
   if (digitalRead(LASER_SWITCH_PIN) == HIGH)
   {
     laser.toggle();
@@ -32,4 +34,5 @@ void loop() {
     Serial.println(laser.getStatus() ? "ON" : "OFF");
     delay(300);
   }
+  Serial.println("running");
 }

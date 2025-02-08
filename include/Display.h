@@ -4,6 +4,6 @@ class Dn_Display {
 private:
 
 public:
-    void init();
-    
+    void init(uint8_t Angle);
+    void lv_demo(void);
 };

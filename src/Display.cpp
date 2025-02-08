@@ -1,16 +1,71 @@
-#include "Display.h"
-#include <Arduino.h>
+#include <Display.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
+#include <lvgl.h>
+#include "examples/lv_examples.h"
 
+#ifndef MY_DISP_HOR_RES
+#define MY_DISP_HOR_RES (240)
+#endif
+
+#ifndef MY_DISP_VER_RES
+#define MY_DISP_VER_RES (240)
+#endif
 TFT_eSPI tft = TFT_eSPI();
 
-void Dn_Display::init()
+static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
+    uint32_t w = (area->x2 - area->x1 + 1);
+    uint32_t h = (area->y2 - area->y1 + 1);
+
+    tft.startWrite();
+    tft.setAddrWindow(area->x1, area->y1, w, h);
+    tft.pushColors(&color_p->full, w * h, true);
+    tft.endWrite();
+
+    lv_disp_flush_ready(disp_drv);
+}
+
+void Dn_Display::init(uint8_t Angle)
+{
+    lv_init();
     tft.init();
-    tft.fillScreen(TFT_WHITE);
-    tft.setTextSize(2);
-    tft.setTextColor(TFT_BLACK);
-    tft.setTextDatum(MC_DATUM);
-    tft.drawString("Hello", tft.width() / 2, tft.height() / 2);
+    tft.fillScreen(TFT_BLACK);
+    // tft.fillScreen(TFT_BROWN);
+
+    /*------------------------------
+     * Create a buffer for drawing
+     *------------------------------*/
+    static lv_disp_draw_buf_t draw_buf_dsc_1;
+    static lv_color_t buf_1[MY_DISP_HOR_RES * 10];                             /* A buffer for 10 rows */
+    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 10); /* Initialize the display */
+
+    /* Register the display in LVGL */
+    static lv_disp_drv_t disp_drv; /* Descriptor of a display driver */
+    lv_disp_drv_init(&disp_drv);   /* Basic initialization */
+
+    /* Set up the functions to access your display */
+
+    /* Set the resolution of the display */
+    disp_drv.hor_res = MY_DISP_HOR_RES;
+    disp_drv.ver_res = MY_DISP_VER_RES;
+
+    /* Used to copy the buffer's content to the display */
+    disp_drv.flush_cb = disp_flush;
+
+    /* Set a display buffer */
+    disp_drv.draw_buf = &draw_buf_dsc_1;
+
+    /* Finally register the driver */
+    lv_disp_drv_register(&disp_drv);
+
+    lv_demo();
 };
+
+void Dn_Display::lv_demo(void)
+{
+    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_label_set_text(label, "Hello world in LVGL");
+    lv_obj_set_style_text_color(lv_scr_act(), lv_color_hex(0x000000), LV_PART_MAIN);
+    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+}
