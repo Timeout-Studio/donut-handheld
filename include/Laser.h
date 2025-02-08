@@ -3,7 +3,7 @@
 class Dn_Laser
 {
 private:
-    int pin;
+    uint8_t pin;
     bool status;
 
 public:
