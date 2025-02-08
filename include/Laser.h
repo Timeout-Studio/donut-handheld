@@ -7,7 +7,7 @@ private:
     bool status;
 
 public:
-    void init(int pin);
+    void init(uint8_t pin);
     bool toggle();
     bool getStatus();
 };

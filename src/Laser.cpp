@@ -1,7 +1,7 @@
 #include "Laser.h"
 #include <Arduino.h>
 
-void Dn_Laser::init(int pin)
+void Dn_Laser::init(uint8_t pin)
 {
     this->pin = pin;
     this->status = false;

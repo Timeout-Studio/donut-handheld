@@ -11,6 +11,6 @@ private:
     int pwmValue;
 
 public:
-    void init(int s1Pin, int s2Pin, int keyPin);
+    void init(uint8_t s1Pin, uint8_t s2Pin, uint8_t keyPin);
     int read();
 };
