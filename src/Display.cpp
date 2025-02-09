@@ -2,17 +2,23 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <lvgl.h>
-#include "examples/lv_examples.h"
+#include "User_Setup.h" // Get pin definition of TFT_eSPI
+
+// #include "examples/lv_examples.h"
+
+#define LCD_BL_PWM_CHANNEL 1
 
 #ifndef MY_DISP_HOR_RES
-#define MY_DISP_HOR_RES (240)
+    #define MY_DISP_HOR_RES (240)
 #endif
 
 #ifndef MY_DISP_VER_RES
-#define MY_DISP_VER_RES (240)
+    #define MY_DISP_VER_RES (240)
 #endif
+
 TFT_eSPI tft = TFT_eSPI();
 
+// LVLG disp_flush, which connect between LVGL and TFT_eSPI by pixel
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
     uint32_t w = (area->x2 - area->x1 + 1);
@@ -26,45 +32,57 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
     lv_disp_flush_ready(disp_drv);
 }
 
-void Dn_Display::init(uint8_t Angle)
+void Dn_Display::init()
 {
     lv_init();
     tft.init();
     tft.fillScreen(TFT_BLACK);
-    // tft.fillScreen(TFT_BROWN);
 
-    /*------------------------------
-     * Create a buffer for drawing
-     *------------------------------*/
+    // Assign pwm channel
+    ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
+    ledcAttachPin(TFT_BL, LCD_BL_PWM_CHANNEL);
+    setBacklight(255);
+
+    // Create a buffer for drawing and initialize the display
     static lv_disp_draw_buf_t draw_buf_dsc_1;
-    static lv_color_t buf_1[MY_DISP_HOR_RES * 10];                             /* A buffer for 10 rows */
-    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 10); /* Initialize the display */
+    static lv_color_t buf_1[MY_DISP_HOR_RES * 10];
+    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 10);
 
-    /* Register the display in LVGL */
-    static lv_disp_drv_t disp_drv; /* Descriptor of a display driver */
-    lv_disp_drv_init(&disp_drv);   /* Basic initialization */
+    // Register the display in LVGL
+    static lv_disp_drv_t disp_drv; // Descriptor of a display driver
+    lv_disp_drv_init(&disp_drv);   // Basic initialization
 
-    /* Set up the functions to access your display */
+    // Set up the functions to access your display
 
-    /* Set the resolution of the display */
+    // Set the resolution of the display
     disp_drv.hor_res = MY_DISP_HOR_RES;
     disp_drv.ver_res = MY_DISP_VER_RES;
 
     /* Used to copy the buffer's content to the display */
     disp_drv.flush_cb = disp_flush;
 
-    /* Set a display buffer */
+    // Set a display buffer
     disp_drv.draw_buf = &draw_buf_dsc_1;
 
-    /* Finally register the driver */
+    // Finally register the driver
     lv_disp_drv_register(&disp_drv);
 
     lv_demo();
 };
 
+void Dn_Display::routine(void)
+{
+    lv_task_handler();
+}
+
+void Dn_Display::setBacklight(uint8_t range)
+{
+    ledcWrite(LCD_BL_PWM_CHANNEL, range);
+}
+
 void Dn_Display::lv_demo(void)
 {
-    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_obj_t *label = lv_label_create(lv_scr_act());
     lv_label_set_text(label, "Hello world in LVGL");
     lv_obj_set_style_text_color(lv_scr_act(), lv_color_hex(0x000000), LV_PART_MAIN);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);

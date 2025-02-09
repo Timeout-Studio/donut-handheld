@@ -1,9 +1,12 @@
 #pragma once
 
-class Dn_Display {
+class Dn_Display
+{
 private:
+    void lv_demo(void);
 
 public:
-    void init(uint8_t Angle);
-    void lv_demo(void);
+    void init();
+    void routine(void);
+    void setBacklight(uint8_t range);
 };

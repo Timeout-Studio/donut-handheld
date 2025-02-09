@@ -1,7 +1,6 @@
 #include <Laser.h>
 #include <Display.h>
 #include <Encoder.h>
-#include <lvgl.h>
 
 #define LASER_SWITCH_PIN 10
 #define LASER_PIN 11
@@ -19,14 +18,16 @@ void setup()
 
   pinMode(LASER_SWITCH_PIN, INPUT);
 
+  // initiallizing
   laser.init(LASER_PIN);
-  display.init(127);
+  display.init();
   encoder.init(ENCODER_S1_PIN, ENCODER_S2_PIN, ENCODER_KEY_PIN);
 }
 
 void loop()
 {
-  lv_task_handler();
+  display.routine(); // lv_task_handler
+
   if (digitalRead(LASER_SWITCH_PIN) == HIGH)
   {
     laser.toggle();
@@ -34,5 +35,6 @@ void loop()
     Serial.println(laser.getStatus() ? "ON" : "OFF");
     delay(300);
   }
-  Serial.println("running");
+
+  // Serial.println("running");
 }
