@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <Laser.h>
 #include <Display.h>
 #include <Encoder.h>
@@ -19,6 +18,7 @@ void setup()
 
   pinMode(LASER_SWITCH_PIN, INPUT);
 
+  // initiallizing
   laser.init(LASER_PIN);
   display.init();
   encoder.init(ENCODER_S1_PIN, ENCODER_S2_PIN, ENCODER_KEY_PIN);
@@ -26,14 +26,9 @@ void setup()
 
 void loop()
 {
+  display.routine(); // lv_task_handler
 
-  if (digitalRead(LASER_SWITCH_PIN) == HIGH)
-  {
-    laser.toggle();
-    Serial.print("Laser is ");
-    Serial.println(laser.getStatus() ? "ON" : "OFF");
-    delay(300);
-  }
+  // Serial.println("running");
 
   if (encoder.hasRotated())
   {
