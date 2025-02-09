@@ -28,13 +28,18 @@ void loop()
 {
   display.routine(); // lv_task_handler
 
-  if (digitalRead(LASER_SWITCH_PIN) == HIGH)
+  // Serial.println("running");
+
+  if (encoder.hasRotated())
   {
-    laser.toggle();
-    Serial.print("Laser is ");
-    Serial.println(laser.getStatus() ? "ON" : "OFF");
-    delay(300);
+    Serial.print("Encoder Value: ");
+    Serial.println(encoder.getValue());
   }
 
-  // Serial.println("running");
+  if (encoder.isButtonPressed())
+  {
+    Serial.println("Button Pressed!");
+  }
+
+  delay(10); // Debounce delay
 }
