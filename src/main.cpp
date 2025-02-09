@@ -13,7 +13,8 @@ Dn_Laser laser;
 Dn_Display display;
 Dn_Encoder encoder;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
 
   pinMode(LASER_SWITCH_PIN, INPUT);
@@ -23,7 +24,8 @@ void setup() {
   encoder.init(ENCODER_S1_PIN, ENCODER_S2_PIN, ENCODER_KEY_PIN);
 }
 
-void loop() {
+void loop()
+{
 
   if (digitalRead(LASER_SWITCH_PIN) == HIGH)
   {
@@ -32,4 +34,17 @@ void loop() {
     Serial.println(laser.getStatus() ? "ON" : "OFF");
     delay(300);
   }
+
+  if (encoder.hasRotated())
+  {
+    Serial.print("Encoder Value: ");
+    Serial.println(encoder.getValue());
+  }
+
+  if (encoder.isButtonPressed())
+  {
+    Serial.println("Button Pressed!");
+  }
+
+  delay(10); // Debounce delay
 }
