@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <lvgl.h>
-#include "User_Setup.h" // Get pin definition of TFT_eSPI
+#include "PinDefinition.h" // Get pin definition of TFT_eSPI
 
 // #include "examples/lv_examples.h"
 
