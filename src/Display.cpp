@@ -9,11 +9,11 @@
 #define LCD_BL_PWM_CHANNEL 1
 
 #ifndef MY_DISP_HOR_RES
-    #define MY_DISP_HOR_RES (240)
+#define MY_DISP_HOR_RES (240)
 #endif
 
 #ifndef MY_DISP_VER_RES
-    #define MY_DISP_VER_RES (240)
+#define MY_DISP_VER_RES (240)
 #endif
 
 TFT_eSPI tft = TFT_eSPI();
@@ -67,7 +67,7 @@ void Dn_Display::init()
     // Finally register the driver
     lv_disp_drv_register(&disp_drv);
 
-    lv_demo();
+    // lv_demo();
 };
 
 void Dn_Display::routine(void)
@@ -80,10 +80,37 @@ void Dn_Display::setBacklight(uint8_t range)
     ledcWrite(LCD_BL_PWM_CHANNEL, range);
 }
 
-void Dn_Display::lv_demo(void)
+// void Dn_Display::lv_demo(void)
+// {
+//     lv_obj_t *label = lv_label_create(lv_scr_act());
+//     lv_label_set_text(label, "Hello world in LVGL");
+//     lv_obj_set_style_text_color(lv_scr_act(), lv_color_hex(0x000000), LV_PART_MAIN);
+//     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+// }
+
+// Init Content
+void Dn_Display::initInformation()
 {
-    lv_obj_t *label = lv_label_create(lv_scr_act());
-    lv_label_set_text(label, "Hello world in LVGL");
-    lv_obj_set_style_text_color(lv_scr_act(), lv_color_hex(0x000000), LV_PART_MAIN);
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+}
+
+// Game Display
+void Dn_Display::gameBackground()
+{
+}
+
+void Dn_Display::gameBackgrgameAngleDisplayound(int16_t angle)
+{
+}
+
+void Dn_Display::gameAnswerEvent(bool isAnswer)
+{
+}
+
+// Debug Display
+void Dn_Display::debugBackground()
+{
+}
+
+void Dn_Display::debugInformation(char IPAddress, char MAC, uint8_t batteryPertentage, bool laserStatus)
+{
 }
