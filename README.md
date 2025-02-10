@@ -7,10 +7,11 @@ This is a project for 28th Graduation Project of Yuan Ze University Department o
 
 ### Required Libraries
 - bodmer/TFT_eSPI@^2.5.4
+- lvgl/lvgl@8.3.11
 
 ## Tested Hardware
 - Adafruit ESP32-S3 Feather
-- 1.28" 240x240 Rounded Screen GC9A01
+- GC9A01 1.28" 240x240 Rounded Screen
 - Rotary Encoder EC11
 - 1mW Laser Pointer
 
