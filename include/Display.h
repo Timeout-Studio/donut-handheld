@@ -13,7 +13,7 @@ public:
 
     // Game Display
     void gameBackground();
-    void gameBackgrgameAngleDisplayound(int16_t angle);
+    void gameAngleDisplay(int16_t angle);
     void gameAnswerEvent(bool isAnswer);
 
     // Debug Display

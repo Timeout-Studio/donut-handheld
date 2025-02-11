@@ -12,6 +12,8 @@
 #define MY_DISP_HOR_RES (240)
 #define MY_DISP_VER_RES (240)
 
+
+
 TFT_eSPI tft = TFT_eSPI();
 
 // LVLG disp_flush, which connect between LVGL and TFT_eSPI by pixel
@@ -62,6 +64,9 @@ void Dn_Display::init()
 
     // Finally register the driver
     lv_disp_drv_register(&disp_drv);
+
+
+    gameAngleDisplay(1);
 }
 
 void Dn_Display::routine(void)
@@ -84,8 +89,25 @@ void Dn_Display::gameBackground()
 {
 }
 
-void Dn_Display::gameBackgrgameAngleDisplayound(int16_t angle)
+
+void Dn_Display::gameAngleDisplay(int16_t angle)
 {
+    lv_obj_t * arc = lv_arc_create(lv_scr_act());
+    lv_obj_set_size(arc, 232, 232);
+    lv_arc_set_rotation(arc, 180);
+    lv_obj_set_style_arc_width(arc, 0, LV_PART_MAIN);
+    lv_obj_set_style_arc_width(arc, 8, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_color(arc, lv_color_make(255, 0, 0), LV_PART_INDICATOR);
+    // lv_obj_set_style_line_color
+    lv_arc_set_angles(arc, 180, 270);
+    lv_arc_set_bg_angles(arc, 0,360);
+
+    lv_obj_remove_style(arc, NULL, LV_PART_KNOB);   /*Be sure the knob is not displayed*/
+    // lv_obj_remove_style(arc, NULL, LV_PART_MAIN);
+
+    lv_obj_clear_flag(arc, LV_OBJ_FLAG_CLICKABLE);  /*To not allow adjusting by click*/
+    lv_obj_center(arc);
+
 }
 
 void Dn_Display::gameAnswerEvent(bool isAnswer)
