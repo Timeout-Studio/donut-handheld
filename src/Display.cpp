@@ -92,6 +92,10 @@ void Dn_Display::gameBackground()
 
 void Dn_Display::gameAngleDisplay(int16_t angle)
 {
+    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(label, &inter_display_32, 0);
+    lv_label_set_text(label, "Hello world in LVGL");
+
     lv_obj_t * arc = lv_arc_create(lv_scr_act());
     lv_obj_set_size(arc, 232, 232);
     lv_arc_set_rotation(arc, 180);
