@@ -3,6 +3,8 @@
 #include <TFT_eSPI.h>
 #include <lvgl.h>
 #include "PinDefinition.h" // Get pin definition of TFT_eSPI
+LV_FONT_DECLARE(inter_display_32)
+
 
 // #include "examples/lv_examples.h"
 
