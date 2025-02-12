@@ -4,7 +4,8 @@
 #include <lvgl.h>
 #include "PinDefinition.h" // Get pin definition of TFT_eSPI
 LV_FONT_DECLARE(inter_display_32)
-
+LV_FONT_DECLARE(inter_10)
+LV_FONT_DECLARE(inter_16)
 
 // #include "examples/lv_examples.h"
 
@@ -13,8 +14,6 @@ LV_FONT_DECLARE(inter_display_32)
 // Display Size
 #define MY_DISP_HOR_RES (240)
 #define MY_DISP_VER_RES (240)
-
-
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -37,6 +36,7 @@ void Dn_Display::init()
     lv_init();
     tft.init();
     tft.fillScreen(TFT_BLACK);
+    tft.setRotation(1);
 
     // Assign pwm channel
     ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
@@ -67,7 +67,6 @@ void Dn_Display::init()
     // Finally register the driver
     lv_disp_drv_register(&disp_drv);
 
-
     gameAngleDisplay(1);
 }
 
@@ -91,15 +90,27 @@ void Dn_Display::gameBackground()
 {
 }
 
-
 void Dn_Display::gameAngleDisplay(int16_t angle)
 {
-    lv_obj_t * label = lv_label_create(lv_scr_act());
+    lv_obj_t *label = lv_label_create(lv_scr_act());
     lv_obj_set_style_text_font(label, &inter_display_32, 0);
     lv_label_set_text(label, "17°");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, -10);
 
-    lv_obj_t * arc = lv_arc_create(lv_scr_act());
+
+
+    lv_obj_t *label2 = lv_label_create(lv_scr_act());
+    lv_obj_set_style_text_font(label2, &inter_16, 0);
+    lv_label_set_text(label2, "Away From Target");
+    static lv_style_t style;
+    lv_style_init(&style);
+    lv_style_set_text_letter_space(&style, -0.5);
+    lv_obj_add_style(label2, &style, LV_PART_MAIN);
+    lv_obj_align(label2, LV_ALIGN_CENTER, 0, 15);
+
+
+
+    lv_obj_t *arc = lv_arc_create(lv_scr_act());
     lv_obj_set_size(arc, 232, 232);
     lv_arc_set_rotation(arc, 180);
     lv_obj_set_style_arc_width(arc, 0, LV_PART_MAIN);
@@ -107,14 +118,13 @@ void Dn_Display::gameAngleDisplay(int16_t angle)
     lv_obj_set_style_arc_color(arc, lv_color_make(255, 0, 0), LV_PART_INDICATOR);
     // lv_obj_set_style_line_color
     lv_arc_set_angles(arc, 180, 270);
-    lv_arc_set_bg_angles(arc, 0,360);
+    lv_arc_set_bg_angles(arc, 0, 360);
 
-    lv_obj_remove_style(arc, NULL, LV_PART_KNOB);   /*Be sure the knob is not displayed*/
+    lv_obj_remove_style(arc, NULL, LV_PART_KNOB); /*Be sure the knob is not displayed*/
     // lv_obj_remove_style(arc, NULL, LV_PART_MAIN);
 
-    lv_obj_clear_flag(arc, LV_OBJ_FLAG_CLICKABLE);  /*To not allow adjusting by click*/
+    lv_obj_clear_flag(arc, LV_OBJ_FLAG_CLICKABLE); /*To not allow adjusting by click*/
     lv_obj_center(arc);
-
 }
 
 void Dn_Display::gameAnswerEvent(bool isAnswer)
