@@ -1,5 +1,5 @@
-# Do-Nut Handheld Device
-This is a project for 28th Graduation Project of Yuan Ze University Department of Information Communiication
+# Do-NUT Handheld Device
+This is a sub-project for 28th Graduation Project of Yuan Ze University Department of Information Communication by Timeout Studio
 
 ## Installation
 ### Required Plugins
@@ -11,8 +11,9 @@ This is a project for 28th Graduation Project of Yuan Ze University Department o
 
 ### Steps
 1. Clone repo
-2. Go to include/User_Setup.h and replace the content of .pio/libdeps/YOUR_BOARD/TFT_eSPI/User_Setup.h
-3. 
+2. Delete `.pio/libdeps/YOUR_BOARD/TFT_eSPI/User_Setup.h` (We put it in include folder and use build_flags)
+3. Move `./include/lv_conf.h` to `.pio/libdeps/YOUR_BOARD/lvgl`
+
 ## Tested Hardware
 - Adafruit ESP32-S3 Feather
 - GC9A01 1.28" 240x240 Rounded Screen
