@@ -1,17 +1,9 @@
-#define USER_SETUP_ID 70
+#include "PinDefinition.h"
 
 #define GC9A01_DRIVER
 
 #define TFT_WIDTH  240
 #define TFT_HEIGHT 240
-
-#define TFT_CS   15
-#define TFT_MOSI 35
-#define TFT_SCLK 36
-
-#define TFT_DC    14
-#define TFT_RST   8
-#define TFT_BL   37
 
 #define LOAD_GLCD
 #define LOAD_FONT2
