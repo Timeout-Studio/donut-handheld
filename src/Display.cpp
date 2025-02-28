@@ -41,7 +41,7 @@ void Dn_Display::init()
     // Assign pwm channel
     ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
     ledcAttachPin(TFT_BL, LCD_BL_PWM_CHANNEL);
-    setBacklight(255);
+    // setBacklight(255);
 
     // Create a buffer for drawing and initialize the display
     static lv_disp_draw_buf_t draw_buf_dsc_1;
