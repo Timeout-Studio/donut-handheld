@@ -14,6 +14,23 @@ Dn_Display display;
 Dn_Encoder encoder;
 Dn_Gyroscope gyroscope;
 
+void taskGyroscope(void *pvParameters)
+{
+  for (;;)
+  {
+    gyroscope.readDegree();
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
+}
+
+void IRAM_ATTR isrLaser()
+{
+  laser.toggle();
+  Serial.print("Laser is ");
+  Serial.println(laser.getStatus() ? "ON" : "OFF");
+  // delay(300);
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -26,6 +43,8 @@ void setup()
   display.setBacklight(127);
   encoder.init(ENCODER_S1_PIN, ENCODER_S2_PIN, ENCODER_KEY_PIN);
   gyroscope.init(123);
+  attachInterrupt(digitalPinToInterrupt(LASER_SWITCH_PIN), isrLaser, RISING);
+  xTaskCreate(taskGyroscope, "taskGyroscope", 2048, NULL, 1, NULL);
 }
 
 void loop()
@@ -37,19 +56,4 @@ void loop()
     Serial.print("Encoder Value: ");
     Serial.println(encoder.getValue());
   }
-
-  if (encoder.isButtonPressed())
-  {
-    Serial.println("Button Pressed!");
-  }
-
-  if (digitalRead(LASER_SWITCH_PIN) == HIGH)
-  {
-    laser.toggle();
-    Serial.print("Laser is ");
-    Serial.println(laser.getStatus() ? "ON" : "OFF");
-    delay(300);
-  }
-
-  gyroscope.readDegree();
 }
