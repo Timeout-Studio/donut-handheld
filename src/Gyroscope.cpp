@@ -18,7 +18,7 @@ void Dn_Gyroscope::init(uint8_t i2cAddr)
     displaySensorDetails();
 }
 
-float Dn_Gyroscope::readDegree()
+float Dn_Gyroscope::readAngle()
 {
     sensors_event_t event;
     mag.getEvent(&event);
@@ -36,11 +36,26 @@ float Dn_Gyroscope::readDegree()
 
     float headingDegrees = heading * 180 / M_PI;
 
-    Serial.print("Heading (degrees): ");
-    Serial.println(headingDegrees);
-
     delay(100);
     return headingDegrees;
+}
+
+float Dn_Gyroscope::readCalibratedAngle()
+{
+    float originalAngle = readAngle();
+    float calibratedAngle = originalAngle - calibrationFactor;
+
+    if (calibratedAngle < 0)
+    {
+        calibratedAngle += 360;
+    }
+
+    return calibratedAngle;
+}
+
+void Dn_Gyroscope::calibrate()
+{
+    this->calibrationFactor = readAngle();
 }
 
 void Dn_Gyroscope::displaySensorDetails(void)

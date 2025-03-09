@@ -5,6 +5,7 @@
 #include <Websocket.h>
 #include <WiFi.h>
 
+#define GYRO_CALIBRATION_PIN 12
 #define LASER_SWITCH_PIN 10
 #define LASER_PIN 11
 #define ENCODER_S1_PIN 6
@@ -28,7 +29,24 @@ void taskGyroscope(void *pvParameters)
 {
   for (;;)
   {
-    gyroscope.readDegree();
+    if (gyroscope.calibrationFactor == 0.0)
+    {
+      float angle = gyroscope.readAngle();
+      Serial.print("Heading (degrees): ");
+      Serial.println(angle);
+    }
+    else
+    {
+      float calibrated = gyroscope.readCalibratedAngle();
+      Serial.print("Calibrated Heading (degrees): ");
+      Serial.println(calibrated);
+    }
+
+    if (digitalRead(GYRO_CALIBRATION_PIN) == HIGH)
+    {
+      gyroscope.calibrate();
+    }
+
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
@@ -63,6 +81,7 @@ void setup()
   websocket.begin(websocketServer, websocketPort, websocketPath, username);
 
   pinMode(LASER_SWITCH_PIN, INPUT);
+  pinMode(GYRO_CALIBRATION_PIN, INPUT);
 
   // initiallizing
   laser.init(LASER_PIN);
@@ -77,12 +96,6 @@ void setup()
 void loop()
 {
   display.routine(); // lv_task_handler
-
-  if (encoder.hasRotated())
-  {
-    Serial.print("Encoder Value: ");
-    Serial.println(encoder.getValue());
-  }
 
   static unsigned long lastTime = 0;
   if (millis() - lastTime > 10000)

@@ -7,8 +7,10 @@ class Dn_Gyroscope
 private:
     Adafruit_HMC5883_Unified mag;
     void displaySensorDetails(void);
-
 public:
+    float calibrationFactor = 0.0;
     void init(uint8_t address);
-    float readDegree();
+    float readAngle();
+    float readCalibratedAngle();
+    void calibrate();
 };
