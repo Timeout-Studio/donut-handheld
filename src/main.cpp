@@ -2,6 +2,8 @@
 #include <Display.h>
 #include <Encoder.h>
 #include <Gyroscope.h>
+#include <Websocket.h>
+#include <WiFi.h>
 
 #define LASER_SWITCH_PIN 10
 #define LASER_PIN 11
@@ -13,6 +15,14 @@ Dn_Laser laser;
 Dn_Display display;
 Dn_Encoder encoder;
 Dn_Gyroscope gyroscope;
+Dn_Websocket websocket;
+
+const char *ssid = "Timeout Studio 2.4G";
+const char *password = "Timeout500";
+const char *websocketServer = "192.168.0.100";
+const uint16_t websocketPort = 8765;
+const char *websocketPath = "/ws";
+const char *username = "baby_alligator_2";
 
 void taskGyroscope(void *pvParameters)
 {
@@ -35,6 +45,23 @@ void setup()
 {
   Serial.begin(115200);
 
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Initialize WebSocket connection in its own thread
+  websocket.begin(websocketServer, websocketPort, websocketPath, username);
+
   pinMode(LASER_SWITCH_PIN, INPUT);
 
   // initiallizing
@@ -56,4 +83,24 @@ void loop()
     Serial.print("Encoder Value: ");
     Serial.println(encoder.getValue());
   }
+
+  static unsigned long lastTime = 0;
+  if (millis() - lastTime > 10000)
+  {
+    lastTime = millis();
+
+    if (websocket.isWebSocketConnected())
+    {
+      // Send a message to a specific user
+      websocket.sendMessage("baby_alligator_1", "Hello from ESP32");
+      Serial.println("Sent message to server");
+    }
+    else
+    {
+      Serial.println("Not connected, can't send message");
+    }
+  }
+
+  // Other tasks can run here without being affected by WebSocket operations
+  delay(5);
 }
