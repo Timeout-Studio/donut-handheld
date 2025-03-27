@@ -142,6 +142,9 @@ void Dn_Display::routine(uint16_t angle)
     Serial.println(angle);
     lv_img_set_angle(indicatorLine, angle * 10);
     lv_arc_set_angles(angleArc, 0, angle);
+    char buf[10];
+    sprintf(buf, "%d", angle);
+    lv_label_set_text(angleNum, buf);
 }
 
 void Dn_Display::setBacklight(uint8_t range)
