@@ -95,7 +95,7 @@ void setup()
 
 void loop()
 {
-  display.routine(); // lv_task_handler
+  display.routine(uint16_t(gyroscope.readAngle())); // lv_task_handler
 
   static unsigned long lastTime = 0;
   if (millis() - lastTime > 10000)

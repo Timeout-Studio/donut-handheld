@@ -32,7 +32,7 @@
 /*Enable features to draw on transparent background.
  *It's required if opa, and transform_* style properties are used.
  *Can be also used if the UI is above another layer, e.g. an OSD menu or video player.*/
-#define LV_COLOR_SCREEN_TRANSP 0
+#define LV_COLOR_SCREEN_TRANSP 1
 
 /* Adjust color mix functions rounding. GPUs might calculate color mix (blending) differently.
  * 0: round down, 64: round up from x.75, 128: round up from half, 192: round up from x.25, 254: round up */
@@ -49,7 +49,7 @@
 #define LV_MEM_CUSTOM 0
 #if LV_MEM_CUSTOM == 0
     /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-    #define LV_MEM_SIZE (48U * 1024U)          /*[bytes]*/
+    #define LV_MEM_SIZE (128U * 1024U)          /*[bytes]*/
 
     /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
     #define LV_MEM_ADR 0     /*0: unused*/
@@ -281,7 +281,7 @@
 /*1: Show CPU usage and FPS count*/
 #define LV_USE_PERF_MONITOR 0
 #if LV_USE_PERF_MONITOR
-    #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_RIGHT
+    #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_MID
 #endif
 
 /*1: Show the used memory and the memory fragmentation
