@@ -38,7 +38,9 @@ private:
 public:
     Dn_Websocket();
     ~Dn_Websocket();
-    
+
+    const char *lastMessage;
+
     void begin(const char* serverAddress, uint16_t port, const char* url, const char* username);
     void stop();
     bool sendMessage(const char* to, const char* message);
