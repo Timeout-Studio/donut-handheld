@@ -13,14 +13,6 @@ void webSocketTaskFunction(void *parameter)
         // Process WebSocket events (with timeout to prevent blocking)
         client->webSocket.loop();
 
-        // Check if heartbeat needed
-        unsigned long currentMillis = millis();
-        if (currentMillis - client->lastHeartbeat > 30000)
-        { // 30 seconds
-            client->sendHeartbeat();
-            client->lastHeartbeat = currentMillis;
-        }
-
         // Check message queue for outgoing messages
         WSMessage msg;
         if (xQueueReceive(client->messageQueue, &msg, 0) == pdTRUE)
@@ -44,7 +36,7 @@ void webSocketTaskFunction(void *parameter)
                     Serial.println("[WSc] Message sent");
 
                     // Brief delay to allow TCP stack to process
-                    vTaskDelay(10 / portTICK_PERIOD_MS);
+                    vTaskDelay(5 / portTICK_PERIOD_MS);
                 }
 
                 // Force garbage collection
@@ -53,7 +45,7 @@ void webSocketTaskFunction(void *parameter)
         }
 
         // Small delay to prevent CPU hogging
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        vTaskDelay(5 / portTICK_PERIOD_MS);
     }
 
     client->webSocketTaskHandle = NULL;
@@ -188,20 +180,20 @@ void Dn_Websocket::stop()
     // Disconnect WebSocket
     webSocket.disconnect();
 
-    Serial.println("[WSc] WebSocket client stopped");
+    Serial.println("WebSocket client stopped");
 }
 
 bool Dn_Websocket::sendMessage(const char *to, const char *message)
 {
     if (!isRunning)
     {
-        Serial.println("[WSc] Cannot send message: client not running");
+        Serial.println("Cannot send message: client not running");
         return false;
     }
 
     if (!isConnected)
     {
-        Serial.println("[WSc] Cannot send message: not connected");
+        Serial.println("Cannot send message: not connected");
         return false;
     }
 
@@ -219,7 +211,7 @@ bool Dn_Websocket::sendMessage(const char *to, const char *message)
     // Send to queue with timeout
     if (xQueueSend(messageQueue, &msg, pdMS_TO_TICKS(100)) != pdTRUE)
     {
-        Serial.println("[WSc] Message queue full, message dropped");
+        Serial.println("Message queue full, message dropped");
         return false;
     }
 
@@ -286,6 +278,8 @@ void Dn_Websocket::handleMessage(char *payload)
         const char *from = doc["from"];
         const char *message = doc["message"];
 
+        lastMessage = message;
+
         Serial.print("Message from ");
         Serial.print(from);
         Serial.print(": ");
@@ -312,20 +306,6 @@ void Dn_Websocket::registerUsername()
 
         // Send registration message
         webSocket.sendTXT(jsonBuffer, len);
-        Serial.println("[WSc] Username registration sent");
+        Serial.println("Username registration sent");
     }
-}
-
-void Dn_Websocket::sendHeartbeat()
-{
-    // Simple heartbeat message to keep connection alive
-    DynamicJsonDocument doc(128);
-    doc["type"] = "heartbeat";
-    doc["from"] = username;
-
-    char jsonBuffer[64];
-    size_t len = serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));
-
-    webSocket.sendTXT(jsonBuffer, len);
-    Serial.println("[WSc] Heartbeat sent");
 }
