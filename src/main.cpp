@@ -12,6 +12,8 @@
 #define ENCODER_S2_PIN 5
 #define ENCODER_KEY_PIN 9
 
+
+
 Dn_Laser laser;
 Dn_Display display;
 Dn_Encoder encoder;
@@ -95,7 +97,8 @@ void setup()
 
 void loop()
 {
-  display.routine(uint16_t(gyroscope.readAngle())); // lv_task_handler
+  display.routine(); // lv_task_handler
+  display.displayUpdateLoop(int16_t(gyroscope.readAngle()) - 180);
 
   static unsigned long lastTime = 0;
   if (millis() - lastTime > 10000)
