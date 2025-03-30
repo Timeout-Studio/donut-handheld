@@ -2,6 +2,78 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
+static Dn_Mode currentMode = GAME;
+
+/* --- private functions --- */
+
+// LVGL disp_flush, which connect between LVGL and TFT_eSPI by pixel
+static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
+{
+    uint32_t w = (area->x2 - area->x1 + 1);
+    uint32_t h = (area->y2 - area->y1 + 1);
+
+    tft.startWrite();
+    tft.setAddrWindow(area->x1, area->y1, w, h);
+    tft.pushColors(&color_p->full, w * h, true);
+    tft.endWrite();
+
+    lv_disp_flush_ready(disp_drv);
+}
+
+void Dn_Display::lvglInit()
+{
+    lv_init();
+    tft.init();
+    tft.fillScreen(TFT_BLACK);
+    tft.setRotation(2);
+
+    // Assign pwm channel
+    ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
+    ledcAttachPin(TFT_BL, LCD_BL_PWM_CHANNEL);
+
+    // Create a buffer for drawing and initialize the display
+    static lv_disp_draw_buf_t draw_buf_dsc;
+    static lv_color_t buf_1[MY_DISP_HOR_RES * 10];
+    static lv_color_t buf_2[MY_DISP_HOR_RES * 10];
+    lv_disp_draw_buf_init(&draw_buf_dsc, buf_1, buf_2, MY_DISP_HOR_RES * 10);
+
+    // Register the display in LVGL
+    static lv_disp_drv_t disp_drv; // Descriptor of a display driver
+    lv_disp_drv_init(&disp_drv);   // Basic initialization
+
+    // Set the resolution of the display
+    disp_drv.hor_res = MY_DISP_HOR_RES;
+    disp_drv.ver_res = MY_DISP_VER_RES;
+
+    /* Used to copy the buffer's content to the display */
+    disp_drv.flush_cb = disp_flush;
+
+    // Set a display buffer
+    disp_drv.draw_buf = &draw_buf_dsc;
+
+    disp_drv.full_refresh = 1;
+
+    // Finally register the driver
+    lv_disp_drv_register(&disp_drv);
+
+    // Style & components settings
+    setBackgroundColor(lv_color_hex(0x000000));
+}
+
+void Dn_Display::componentsReset()
+{
+    if (currentMode == GAME)
+    {
+        gameComponentSettings();
+        // TODO remove debug components
+    }
+    else if (currentMode == DEBUG)
+    {
+        debugComponentSettings();
+        // TODO remove game components
+    }
+}
+
 void Dn_Display::gameComponentSettings()
 {
     container = lv_obj_create(lv_scr_act());
@@ -72,19 +144,7 @@ void Dn_Display::debugComponentSettings()
 {
 }
 
-// LVGL disp_flush, which connect between LVGL and TFT_eSPI by pixel
-static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
-{
-    uint32_t w = (area->x2 - area->x1 + 1);
-    uint32_t h = (area->y2 - area->y1 + 1);
-
-    tft.startWrite();
-    tft.setAddrWindow(area->x1, area->y1, w, h);
-    tft.pushColors(&color_p->full, w * h, true);
-    tft.endWrite();
-
-    lv_disp_flush_ready(disp_drv);
-}
+/* --- public functions --- */
 
 // Display System
 void Dn_Display::init()
@@ -93,58 +153,9 @@ void Dn_Display::init()
     gameComponentSettings();
 }
 
-void Dn_Display::lvglInit()
-{
-    lv_init();
-    tft.init();
-    tft.fillScreen(TFT_BLACK);
-    tft.setRotation(2);
-
-    // Assign pwm channel
-    ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
-    ledcAttachPin(TFT_BL, LCD_BL_PWM_CHANNEL);
-
-    // Create a buffer for drawing and initialize the display
-    static lv_disp_draw_buf_t draw_buf_dsc;
-    static lv_color_t buf_1[MY_DISP_HOR_RES * 10];
-    static lv_color_t buf_2[MY_DISP_HOR_RES * 10];
-    lv_disp_draw_buf_init(&draw_buf_dsc, buf_1, buf_2, MY_DISP_HOR_RES * 10);
-
-    // Register the display in LVGL
-    static lv_disp_drv_t disp_drv; // Descriptor of a display driver
-    lv_disp_drv_init(&disp_drv);   // Basic initialization
-
-    // Set the resolution of the display
-    disp_drv.hor_res = MY_DISP_HOR_RES;
-    disp_drv.ver_res = MY_DISP_VER_RES;
-
-    /* Used to copy the buffer's content to the display */
-    disp_drv.flush_cb = disp_flush;
-
-    // Set a display buffer
-    disp_drv.draw_buf = &draw_buf_dsc;
-
-    disp_drv.full_refresh = 1;
-
-    // Finally register the driver
-    lv_disp_drv_register(&disp_drv);
-
-    // Style & components settings
-    setBackgroundColor(lv_color_hex(0x000000));
-
-    // routine();
-    // Serial.println("hello1");
-}
-
-void Dn_Display::routine(uint16_t angle)
+void Dn_Display::routine()
 {
     lv_task_handler();
-    Serial.println(angle);
-    lv_img_set_angle(indicatorLine, angle * 10);
-    lv_arc_set_angles(angleArc, 0, angle);
-    char buf[10];
-    sprintf(buf, "%d", angle);
-    lv_label_set_text(angleNum, buf);
 }
 
 void Dn_Display::setBacklight(uint8_t range)
@@ -157,43 +168,55 @@ void Dn_Display::setBackgroundColor(lv_color_t color)
     lv_obj_set_style_bg_color(lv_scr_act(), color, LV_PART_MAIN);
 }
 
+void Dn_Display::setDisplayMode(Dn_Mode mode)
+{
+    currentMode = mode;
+    componentsReset();
+}
+
+// TODO consider if else in main.cpp to fit args
+void Dn_Display::displayUpdateLoop(int16_t angle)
+{
+    if (currentMode == GAME)
+    {
+        gameDisplay(angle);
+    }
+    else if (currentMode == DEBUG)
+    {
+        // TODO debug display
+    }
+}
+
 // Game Display
-void Dn_Display::gameAngleDisplay(int16_t angle)
+void Dn_Display::gameDisplay(int16_t angle)
 {
-    // Serial.print("angle: ");
-    // Serial.println(angle);
+    Serial.println(angle);
 
-    // int16_t target_angle = (angle >= 0) ? angle : (360 + angle);
-    // setAngle(target_angle);
-    // lv_label_set_text_fmt(angleNum, "%d", angle);
-    // lv_obj_set_style_arc_color(angleArc, lv_color_hsv_to_rgb(angle, 100, 100), LV_PART_INDICATOR);
+    if (angle > 90)
+        angle = 90;
+    if (angle < -90)
+        angle = -90;
 
-    // lv_obj_set_style_transform_angle(indicator, angle, LV_PART_MAIN);
+    if (angle >= 0)
+    {
+        lv_arc_set_angles(angleArc, 0, angle);
+    }
+    else
+    {
+        lv_arc_set_angles(angleArc, 360 + angle, 0);
+    }
+    lv_img_set_angle(indicatorLine, angle * 10);
+
+    angle = abs(angle);
+    char buf[10];
+    sprintf(buf, "%d", angle);
+    lv_label_set_text(angleNum, buf);
+    lv_obj_set_style_arc_color(angleArc, lv_color_hsv_to_rgb(90 - angle, 100, 100), LV_PART_INDICATOR);
+    lv_obj_set_style_img_recolor(indicatorLine, lv_color_hsv_to_rgb(90 - angle, 100, 100), LV_PART_MAIN);
+    lv_obj_set_style_img_recolor_opa(indicatorLine, LV_OPA_100, LV_PART_MAIN);
 }
 
-void Dn_Display::setAngle(int16_t target_angle)
+void Dn_Display::debugDisplay(char IPAddress, char MAC, uint8_t batteryPertentage, bool laserStatus)
 {
-    // static lv_anim_t angleArcSmooth;
-    // lv_anim_init(&angleArcSmooth);
-    // lv_anim_set_var(&angleArcSmooth, angleArc);
-
-    // lv_anim_set_exec_cb(&angleArcSmooth, [](void *var, int32_t v)
-    //                     { lv_arc_set_angles((lv_obj_t *)var, 0, v); });
-    // lv_anim_set_time(&angleArcSmooth, 10);
-    // lv_anim_set_path_cb(&angleArcSmooth, lv_anim_path_ease_in);
-    // lv_anim_set_values(&angleArcSmooth, lv_arc_get_angle_end(angleArc), target_angle);
-    // lv_anim_start(&angleArcSmooth);
-}
-
-void Dn_Display::gameAnswerEvent(bool isAnswer)
-{
-}
-
-// Debug Display
-void Dn_Display::debugBackground()
-{
-}
-
-void Dn_Display::debugInformation(char IPAddress, char MAC, uint8_t batteryPertentage, bool laserStatus)
-{
+    // TODO　set debug content
 }
