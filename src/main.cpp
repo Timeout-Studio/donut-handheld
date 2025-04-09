@@ -8,15 +8,10 @@
 #define GYRO_CALIBRATION_PIN 12
 #define LASER_SWITCH_PIN 10
 #define LASER_PIN 11
-#define ENCODER_S1_PIN 6
-#define ENCODER_S2_PIN 5
-#define ENCODER_KEY_PIN 9
-
-
+#define TRIGGER_PIN 13
 
 Dn_Laser laser;
 Dn_Display display;
-Dn_Encoder encoder;
 Dn_Gyroscope gyroscope;
 Dn_Websocket websocket;
 
@@ -26,44 +21,32 @@ const char *websocketServer = "192.168.0.100";
 const uint16_t websocketPort = 8765;
 const char *websocketPath = "/ws";
 const char *username = "baby_alligator_2";
+volatile int triggerState = LOW;
+volatile int lastTriggerTime = 0;
+// volatile int triggerState = LOW;
+volatile int lastTriggerState = LOW;
 
-void taskGyroscope(void *pvParameters)
-{
-  for (;;)
-  {
-    if (gyroscope.calibrationFactor == 0.0)
-    {
-      float angle = gyroscope.readAngle();
-      Serial.print("Heading (degrees): ");
-      Serial.println(angle);
-    }
-    else
-    {
-      float calibrated = gyroscope.readCalibratedAngle();
-      Serial.print("Calibrated Heading (degrees): ");
-      Serial.println(calibrated);
-    }
-
-    if (digitalRead(GYRO_CALIBRATION_PIN) == HIGH)
-    {
-      gyroscope.calibrate();
-    }
-
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-  }
-}
-
-void IRAM_ATTR isrLaser()
-{
-  laser.toggle();
-  Serial.print("Laser is ");
-  Serial.println(laser.getStatus() ? "ON" : "OFF");
-  // delay(300);
-}
+// void taskGyroscope(void *pvParameters);
+// void IRAM_ATTR isrLaser();
+void IRAM_ATTR isrTrigger();
 
 void setup()
 {
   Serial.begin(115200);
+
+  pinMode(LASER_SWITCH_PIN, INPUT);
+  pinMode(GYRO_CALIBRATION_PIN, INPUT);
+  pinMode(LASER_PIN, OUTPUT);
+  pinMode(TRIGGER_PIN, INPUT_PULLUP);
+
+  // initiallizing
+  laser.init(LASER_PIN);
+  display.init();
+  display.setBacklight(127);
+  gyroscope.init(123);
+  // attachInterrupt(digitalPinToInterrupt(LASER_SWITCH_PIN), isrLaser, RISING);
+  attachInterrupt(digitalPinToInterrupt(TRIGGER_PIN), isrTrigger, CHANGE);
+  // xTaskCreate(taskGyroscope, "taskGyroscope", 2048, NULL, 1, NULL);
 
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
@@ -74,49 +57,94 @@ void setup()
     Serial.print(".");
   }
 
-  Serial.println();
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
   // Initialize WebSocket connection in its own thread
   websocket.begin(websocketServer, websocketPort, websocketPath, username);
-
-  pinMode(LASER_SWITCH_PIN, INPUT);
-  pinMode(GYRO_CALIBRATION_PIN, INPUT);
-
-  // initiallizing
-  laser.init(LASER_PIN);
-  display.init();
-  display.setBacklight(127);
-  encoder.init(ENCODER_S1_PIN, ENCODER_S2_PIN, ENCODER_KEY_PIN);
-  gyroscope.init(123);
-  attachInterrupt(digitalPinToInterrupt(LASER_SWITCH_PIN), isrLaser, RISING);
-  xTaskCreate(taskGyroscope, "taskGyroscope", 2048, NULL, 1, NULL);
 }
 
 void loop()
 {
+  char *ptr;
+
   display.routine(); // lv_task_handler
-  display.displayUpdateLoop(int16_t(gyroscope.readAngle()) - 180);
+  // display.displayUpdateLoop(0);
+  display.displayUpdateLoop((int)strtod(websocket.lastMessage, &ptr));
+  // Serial.println((int)strtod(websocket.lastMessage, &ptr));
+  // if (triggerState == HIGH)
+  // {
+  //   if (websocket.isWebSocketConnected())
+  //   {
+  //     websocket.sendMessage("baby_alligator_1", "trigger");
+  //     Serial.println("Sent trigger to server");
+  //   }
+  // }
 
-  static unsigned long lastTime = 0;
-  if (millis() - lastTime > 10000)
+  if (lastTriggerState != triggerState)
   {
-    lastTime = millis();
-
+    lastTriggerState = triggerState;
     if (websocket.isWebSocketConnected())
     {
-      // Send a message to a specific user
-      websocket.sendMessage("baby_alligator_1", "Hello from ESP32");
-      Serial.println("Sent message to server");
-    }
-    else
-    {
-      Serial.println("Not connected, can't send message");
+      websocket.sendMessage("baby_alligator_1", "trigger");
+      Serial.println("Sent trigger to server");
     }
   }
 
   // Other tasks can run here without being affected by WebSocket operations
   delay(5);
+}
+
+// void taskGyroscope(void *pvParameters)
+// {
+//   for (;;)
+//   {
+//     if (gyroscope.calibrationFactor == 0.0)
+//     {
+//       float angle = gyroscope.readAngle();
+//       Serial.print("Heading (degrees): ");
+//       Serial.println(angle);
+//     }
+//     else
+//     {
+//       float calibrated = gyroscope.readCalibratedAngle();
+//       Serial.print("Calibrated Heading (degrees): ");
+//       Serial.println(calibrated);
+//     }
+
+//     if (digitalRead(GYRO_CALIBRATION_PIN) == HIGH)
+//     {
+//       gyroscope.calibrate();
+//     }
+
+//     vTaskDelay(100 / portTICK_PERIOD_MS);
+//   }
+// }
+
+// void IRAM_ATTR isrLaser()
+// {
+//   laser.toggle();
+//   Serial.print("Laser is ");
+//   Serial.println(laser.getStatus() ? "ON" : "OFF");
+// }
+
+void IRAM_ATTR isrTrigger()
+{
+  // if (millis() - lastTriggerTime < 30)
+  //   return;
+  // lastTriggerTime = millis();
+
+  // triggerState = digitalRead(TRIGGER_PIN);
+
+  // if (triggerState == LOW)
+  // {
+  //   if (websocket.isWebSocketConnected())
+  //   {
+  //     websocket.sendMessage("baby_alligator_1", "trigger");
+  //     Serial.println("Sent trigger to server");
+  //   }
+  // }
+
+  triggerState = !triggerState; // Toggle trigger state
 }

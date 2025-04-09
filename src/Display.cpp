@@ -190,7 +190,7 @@ void Dn_Display::displayUpdateLoop(int16_t angle)
 // Game Display
 void Dn_Display::gameDisplay(int16_t angle)
 {
-    Serial.println(angle);
+    // Serial.println(angle);
 
     if (angle > 90)
         angle = 90;
