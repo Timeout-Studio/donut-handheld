@@ -39,7 +39,7 @@ public:
     Dn_Websocket();
     ~Dn_Websocket();
 
-    const char *lastMessage;
+    const char *lastMessage = "0";
 
     void begin(const char* serverAddress, uint16_t port, const char* url, const char* username);
     void stop();

@@ -21,7 +21,7 @@ void webSocketTaskFunction(void *parameter)
             {
                 // Create JSON message with limited scope to free memory after sending
                 {
-                    DynamicJsonDocument doc(512); // Reduced size for efficiency
+                    JsonDocument doc; // Reduced size for efficiency
                     doc["type"] = "message";
                     doc["from"] = client->username;
                     doc["to"] = msg.to;
@@ -33,7 +33,6 @@ void webSocketTaskFunction(void *parameter)
 
                     // Send message
                     client->webSocket.sendTXT(jsonBuffer, len);
-                    Serial.println("[WSc] Message sent");
 
                     // Brief delay to allow TCP stack to process
                     vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -86,7 +85,6 @@ void Dn_Websocket::webSocketEvent(WStype_t type, uint8_t *payload, size_t length
                 payloadCopy[length] = '\0';
 
                 // Process the message
-                Serial.printf("[WSc] Received text: %s\n", payloadCopy);
                 clientInstance->handleMessage(payloadCopy);
 
                 // Free the copy
@@ -225,10 +223,6 @@ bool Dn_Websocket::isWebSocketConnected()
 
 void Dn_Websocket::loop()
 {
-    // Optional monitoring function that can be called from main loop
-    // Report memory issues
-    Serial.printf("Free heap: %d\n", ESP.getFreeHeap());
-
     // Check connection status
     if (!isConnected)
     {
@@ -248,7 +242,7 @@ void Dn_Websocket::loop()
 void Dn_Websocket::handleMessage(char *payload)
 {
     // Process incoming messages here
-    DynamicJsonDocument doc(1024);
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, payload);
 
     if (error)
@@ -279,14 +273,7 @@ void Dn_Websocket::handleMessage(char *payload)
         const char *message = doc["message"];
 
         lastMessage = message;
-
-        Serial.print("Message from ");
-        Serial.print(from);
-        Serial.print(": ");
-        Serial.println(message);
     }
-
-    Serial.printf("JSON size: %d bytes\n", measureJson(doc));
 
     // Force garbage collection after JSON processing
     ESP.getFreeHeap();
@@ -297,7 +284,7 @@ void Dn_Websocket::registerUsername()
     if (username[0] != '\0')
     {
         // Create JSON message for registration
-        DynamicJsonDocument doc(256);
+        JsonDocument doc;
         doc["type"] = "register";
         doc["username"] = username;
 
