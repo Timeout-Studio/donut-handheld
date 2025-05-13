@@ -2,8 +2,6 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
-static Dn_Mode currentMode = GAME;
-
 /* --- private functions --- */
 
 // LVGL disp_flush, which connect between LVGL and TFT_eSPI by pixel
@@ -62,16 +60,7 @@ void Dn_Display::lvglInit()
 
 void Dn_Display::componentsReset()
 {
-    if (currentMode == GAME)
-    {
-        gameComponentSettings();
-        // TODO remove debug components
-    }
-    else if (currentMode == DEBUG)
-    {
-        debugComponentSettings();
-        // TODO remove game components
-    }
+    gameComponentSettings();
 }
 
 void Dn_Display::gameComponentSettings()
@@ -140,10 +129,6 @@ void Dn_Display::gameComponentSettings()
     lv_img_set_pivot(indicatorLine, 4, 120);
 }
 
-void Dn_Display::debugComponentSettings()
-{
-}
-
 /* --- public functions --- */
 
 // Display System
@@ -168,23 +153,9 @@ void Dn_Display::setBackgroundColor(lv_color_t color)
     lv_obj_set_style_bg_color(lv_scr_act(), color, LV_PART_MAIN);
 }
 
-void Dn_Display::setDisplayMode(Dn_Mode mode)
-{
-    currentMode = mode;
-    componentsReset();
-}
-
-// TODO consider if else in main.cpp to fit args
 void Dn_Display::displayUpdateLoop(int16_t angle)
 {
-    if (currentMode == GAME)
-    {
-        gameDisplay(angle);
-    }
-    else if (currentMode == DEBUG)
-    {
-        // TODO debug display
-    }
+    gameDisplay(angle);
 }
 
 // Game Display
@@ -214,9 +185,4 @@ void Dn_Display::gameDisplay(int16_t angle)
     lv_obj_set_style_arc_color(angleArc, lv_color_hsv_to_rgb(90 - angle, 100, 100), LV_PART_INDICATOR);
     lv_obj_set_style_img_recolor(indicatorLine, lv_color_hsv_to_rgb(90 - angle, 100, 100), LV_PART_MAIN);
     lv_obj_set_style_img_recolor_opa(indicatorLine, LV_OPA_100, LV_PART_MAIN);
-}
-
-void Dn_Display::debugDisplay(char IPAddress, char MAC, uint8_t batteryPertentage, bool laserStatus)
-{
-    // TODO　set debug content
 }

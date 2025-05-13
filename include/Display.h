@@ -20,12 +20,6 @@ LV_IMG_DECLARE(indicator)
 #define MY_DISP_HOR_RES (240)
 #define MY_DISP_VER_RES (240)
 
-enum Dn_Mode
-{
-    GAME,
-    DEBUG
-};
-
 class Dn_Display
 {
 private:
@@ -44,7 +38,6 @@ private:
     // Component Set
     void componentsReset();
     void gameComponentSettings();
-    void debugComponentSettings();
 
 public:
     // Display System
@@ -52,12 +45,8 @@ public:
     void routine(); // lv_task_handler
     void setBacklight(uint8_t range);
     void setBackgroundColor(lv_color_t color);
-    void setDisplayMode(Dn_Mode mode);
     void displayUpdateLoop(int16_t angle);
 
     // Game Display
     void gameDisplay(int16_t angle);
-
-    // Debug Display
-    void debugDisplay(char IPAddress, char MAC, uint8_t batteryPertentage, bool laserStatus);
 };
