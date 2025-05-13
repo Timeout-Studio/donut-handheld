@@ -6,10 +6,10 @@ This is a sub-project for 28th Graduation Project of Yuan Ze University Departme
 - Platformio
 
 ### Required Libraries
+- bblanchon/ArduinoJson@^7.3.1
 - bodmer/TFT_eSPI@^2.5.4
+- links2004/WebSockets@^2.6.1
 - lvgl/lvgl@8.3.11
-- adafruit/Adafruit HMC5883 Unified@^1.2.3
-- adafruit/Adafruit Unified Sensor@^1.1.15
 
 ### Steps
 1. Clone repo

@@ -15,6 +15,7 @@ Dn_Display display;
 Dn_Gyroscope gyroscope;
 Dn_Websocket websocket;
 
+/* --- Connection Settings --- */
 const char *websocketTarget = "baby_alligator_1";
 const char *ssid = "Timeout Studio 2.4G";
 const char *password = "Timeout500";
@@ -22,6 +23,8 @@ const char *websocketServer = "192.168.0.100";
 const uint16_t websocketPort = 8765;
 const char *websocketPath = "/ws";
 const char *websocketUsername = "baby_alligator_2";
+/* --- End of Connection Settings --- */
+
 unsigned long lastTriggerCheckTime = 0;
 const unsigned long triggerCheckInterval = 50;
 volatile bool triggerPressed = false;
