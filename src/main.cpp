@@ -70,10 +70,7 @@ void setup()
 
 void loop()
 {
-  // char *ptr;
-
   display.routine();
-  // display.displayUpdateLoop((int)strtod(websocket.lastMessage, &ptr));
   display.displayUpdateLoop(atoi(websocket.lastMessage));
 
   if (millis() - lastTriggerCheckTime >= triggerCheckInterval)
