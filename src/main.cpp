@@ -15,8 +15,8 @@ const char *websocketServer = "192.168.0.100";
 const uint16_t websocketPort = 8765;
 const char *websocketPath = "/ws";
 const char *websocketUsername = "baby_alligator_2";
-/* --- End of Connection Settings --- */
 
+/* --- Trigger Settings ---*/
 unsigned long lastTriggerCheckTime = 0;
 const unsigned long triggerCheckInterval = 50;
 volatile bool triggerPressed = false;
