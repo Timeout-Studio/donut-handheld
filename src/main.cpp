@@ -1,18 +1,10 @@
-#include <Laser.h>
 #include <Display.h>
-#include <Encoder.h>
-#include <Gyroscope.h>
 #include <Websocket.h>
 #include <WiFi.h>
 
-#define GYRO_CALIBRATION_PIN 12
-#define LASER_SWITCH_PIN 10
-#define LASER_PIN 11
 #define TRIGGER_PIN 13
 
-Dn_Laser laser;
 Dn_Display display;
-Dn_Gyroscope gyroscope;
 Dn_Websocket websocket;
 
 /* --- Connection Settings --- */
